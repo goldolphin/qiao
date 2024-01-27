@@ -9,10 +9,9 @@ readme = "README.md"
 python = "^3.11"
 pyautogui = "^0.9.54"
 opencv-python = "^4.9.0.80"
-gym = "^0.26.2"
-torch = "^2.1.2"
 stable-baselines3 = "^2.2.1"
 sb3-contrib = "^2.2.1"
+gymnasium = "^0.29.1"
 
 
 [[tool.poetry.source]]
