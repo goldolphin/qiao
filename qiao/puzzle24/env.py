@@ -1,42 +1,67 @@
 import gymnasium
 from gymnasium import spaces
 
+def dividable(x: int, y: int):
+    return y != 0 and x % y == 0
+
+def reduce_numbers(numbers:list[int], index1:int, index2:int, r:int):
+    return [r] + numbers[0:index1] + numbers[index1+1:index2] + numbers[index2+1:]
 
 class Puzzle24Env(gymnasium.Env):
-    def __init__(self, max_seq_len: int) -> None:
-        self.observation_space = spaces.Discrete(max_seq_len + 1)   # candiates + expected results
-        spaces.Discrete
-        self.observation_space = spaces.Dict(
-            {
-                "agent": spaces.Box(0, size - 1, shape=(2,), dtype=int),
-                "target": spaces.Box(0, size - 1, shape=(2,), dtype=int),
-            }
-        )
+    MAX_VALUE = 100
 
-        # We have 4 actions, corresponding to "right", "up", "left", "down"
-        self.action_space = spaces.Discrete(4)
+    def __init__(self, max_len: int) -> None:
+        self.observation_space = spaces.Discrete(max_len + 1)   # number sequence + expected result
 
-        """
-        The following dictionary maps abstract actions from `self.action_space` to
-        the direction we will walk in if that action is taken.
-        I.e. 0 corresponds to "right", 1 to "up" etc.
-        """
-        self._action_to_direction = {
-            0: np.array([1, 0]),
-            1: np.array([0, 1]),
-            2: np.array([-1, 0]),
-            3: np.array([0, -1]),
-        }
+        # 操作数1， 操作数2，操作符（+，-，*，/）
+        self.action_space = spaces.MultiDiscrete([max_len, max_len-1, 4])
 
-        assert render_mode is None or render_mode in self.metadata["render_modes"]
-        self.render_mode = render_mode
+        self.__max_len = max_len
+        self.__numbers: list[int] = None
+        self.__expected: int = 0
 
-        """
-        If human-rendering is used, `self.window` will be a reference
-        to the window that we draw to. `self.clock` will be a clock that is used
-        to ensure that the environment is rendered at the correct framerate in
-        human-mode. They will remain `None` until human-mode is used for the
-        first time.
-        """
-        self.window = None
-        self.clock = None
+    def __get_observation(self):
+        return self.__numbers + [self.__expected]
+    
+    def __get_info(self):
+        return {}
+
+    def reset(self, seed=None, options=None):
+        # We need the following line to seed self.np_random
+        super().reset(seed=seed)
+
+        self.__numbers = self.np_random.integers(0, Puzzle24Env.MAX_VALUE, self.__max_len)
+        self.__expected = self.np_random.integers(0, Puzzle24Env.MAX_VALUE)
+
+        return self.__get_observation(), self.__get_info()
+    
+    def step(self, action):
+        index1 = action[0]
+        index2 = action[1]
+        op = action[2]
+
+        n1 = self.__numbers[index1]
+        n2 = self.__numbers[index2]
+
+        r = -1
+        if op == 0:
+            r = n1 + n2
+        elif op == 1:
+            r = n1 - n2 if n1 >= n2 else n2 - n1
+        elif op == 2:
+            r = n1 * n2
+        elif op == 3:
+            if dividable(n1, n2):
+                r = n1 / n2
+            elif dividable(n2, n1):
+                r = n2 / n1
+            else:
+                r = -1
+        
+        if r >= 0:
+            self.__numbers = reduce_numbers(self.__numbers, index1, index2, r)
+
+        terminated = len(self.__numbers) == 1 and self.__numbers[0] == self.__expected
+        reward = 1 if terminated else 0
+        
+        return self.__get_observation(), reward, terminated, False, self.__get_info()

@@ -12,6 +12,7 @@ opencv-python = "^4.9.0.80"
 stable-baselines3 = "^2.2.1"
 sb3-contrib = "^2.2.1"
 gymnasium = "^0.29.1"
+tqdm = "^4.66.1"
 
 
 [[tool.poetry.source]]
