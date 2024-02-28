@@ -22,7 +22,7 @@ priority = "default"
 
 
 [tool.poetry.group.dev.dependencies]
-ipykernel = "^6.28.0"
+ipykernel = "^6.29.3"
 
 [build-system]
 requires = ["poetry-core"]
