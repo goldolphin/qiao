@@ -12,9 +12,8 @@ class Puzzle24Env(gymnasium.Env):
 
     def __init__(self, max_len: int) -> None:
         self.observation_space = spaces.Discrete(max_len + 1)   # number sequence + expected result
-
         # 操作数1， 操作数2，操作符（+，-，*，/）
-        self.action_space = spaces.MultiDiscrete([max_len, max_len-1, 4])
+        self.action_space = spaces.Discrete(3)
 
         self.__max_len = max_len
         self.__numbers: list[int] = None
